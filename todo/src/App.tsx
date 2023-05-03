@@ -3,11 +3,13 @@ import logo from "./logo.svg";
 import "./App.css";
 import { title } from "process";
 import { ListFormat } from "typescript";
+// https://github.com/florinpop17/app-ideas/blob/master/Projects/2-Intermediate/To-Do-App.md
 
 function App() {
   interface ListItem {
     id: number;
     title: string;
+    completed: boolean;
   }
 
   const [itemList, setItemList] = useState<ListItem[]>([]);
@@ -15,11 +17,18 @@ function App() {
 
   const handleClick = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    // listItem.map creates new list of ids, then compares them.
+    const maxNumber: number = Math.max(...itemList.map((item: ListItem) => item.id));
+    console.log(itemList);
+
+
     setItemList((prevItems) => [
       ...prevItems,
       {
-        id: itemList[itemList.length - 1].id,
-        title: form,
+        id: (itemList.length === 0) ? 0: maxNumber+1,
+        title: (form === "") ? "No Title" : form,
+        completed: false
       },
     ]);
     // Reset the form input
@@ -39,21 +48,29 @@ function App() {
 
   }
 
+  const completeItem = (id: number, event: React.FormEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    // Set item when ID is the same. Otherwise just replace with the same item.
+    setItemList((currentList) => currentList.map(item => (item.id === id) ? {...item, completed: true} : item))
+    
+  }
+
   return (
     <div className="App">
       <form onSubmit={handleClick}>
         <label>Input your Task</label>
         <input value={form} onChange={updateFormState} type="text"></input>
-        <button type="submit">Yeah boi</button>
+        <button type="submit">Create</button>
       </form>
       <div>
         {itemList &&
           itemList.map((item) => (
             <div key={item.id}>
-              <h1>{item.title}</h1>
+              <h1 style={item.completed ? { textDecoration : 'line-through' }: {textDecoration : 'none;'}}>{item.title}</h1>
               <p>{item.id}</p>
               <form>
-                <button onClick={() => delteItem(item.id)} type="button">Done</button>
+                <button onClick={() => delteItem(item.id)} type="button">Remove</button>
+                <button disabled={item.completed ? true : false} onClick={(event) => completeItem(item.id, event)}>Completed</button>
               </form>            
             </div>
           ))}
