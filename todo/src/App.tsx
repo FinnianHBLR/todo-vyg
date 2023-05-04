@@ -1,43 +1,30 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import { title } from "process";
 import { ListFormat } from "typescript";
-import { Filters } from "./types/types";
+import { Filters, ListItem } from "./types/types";
 
 import { CheckBoxFilters } from "./components/filters";
 
 // https://github.com/florinpop17/app-ideas/blob/master/Projects/2-Intermediate/To-Do-App.md
 
 function App() {
-  interface ListItem {
-    id: number;
-    title: string;
-    completed: boolean;
-    editing: boolean;
-    date: string;
-  }
-
+  // State of list items
   const [itemList, setItemList] = useState<ListItem[]>([]);
+  // State of form input
   const [form, setForm] = useState<string>("");
-
-
+  // State of filter checkboxes
   const [filtersState, setFilter] = useState<Filters>({active: true, complete: true});
 
-
-  // Load JSON from local storage
   useEffect(() => {
-    // Active toggle
+    // Load JSON tasks from local storage
     const localTasks = window.localStorage.getItem('tasks');
-    localTasks && setItemList(JSON.parse(localTasks));
-    // Compelte task toggle
-    
+    localTasks && setItemList(JSON.parse(localTasks));    
   }, []);
 
-  // Watch task state for updates
-  const initialRender = useRef(true);
-
-  
+  // Stop items clearing on page refresh.
+  const initialRender = useRef(true);  
   useEffect(() => {
     if (initialRender.current) {
       initialRender.current = false;
@@ -47,15 +34,16 @@ function App() {
   }
   }, [itemList]);
 
+  // Handle form input
   const handleClick = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    // listItem.map creates new list of ids, then compares them.
+    // GET the max number of ids in the list. - listItem.map creates new list of ids, then compares them.
     const maxNumber: number = Math.max(
       ...itemList.map((item: ListItem) => item.id)
     );
-    console.log(itemList);
 
+    // Create new item and add to list
     setItemList((prevItems) => [
       ...prevItems,
       {
@@ -69,7 +57,8 @@ function App() {
     // Reset the form input
     setForm("");
   };
-
+  
+  // Update form with new input
   const updateFormState = (event: {
     target: { value: React.SetStateAction<string> };
   }) => {
@@ -78,7 +67,7 @@ function App() {
   };
 
   const delteItem = (id: number) => {
-    // Get current list, remove id ID is the same.
+    // Get current list, remove id ID is the same. This is becaise ids != index.
     setItemList((currentList) => currentList.filter((item) => item.id !== id));
   };
 
@@ -95,6 +84,7 @@ function App() {
     );
   };
 
+  // 3 diffrernet ways to initate the editItem function. 1. Form submit, 2. Button click, 3. Paragraph click.
   const editItem = (
     id: number,
     event:
@@ -102,25 +92,17 @@ function App() {
       | React.MouseEvent<HTMLButtonElement, MouseEvent>
       | React.MouseEvent<HTMLParagraphElement, MouseEvent>
   ) => {
-    // Also could be React.FormEvent<HTMLButtonElement>
     event.preventDefault();
     setItemList((currentList) =>
       currentList.map((item) =>
         item.id === id ? { ...item, editing: !item.editing } : item
       )
     );
-    // Enable text input form that repalces the p with a text input, onsubmit updates the object
   };
 
-  const setEdit = (
-    id: number,
-    event: {
-      target: { value: React.SetStateAction<string> };
-    }
-  ) => {
-    // Below seems like a bad idea.
-    const input: string = String(event.target.value);
-    console.log(input);
+  // Update the title of the item, this is only done when edit mode is true.
+  const setEdit =  (id: number, event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target.value;
 
     setItemList((currentList) =>
       currentList.map((item) =>
@@ -150,15 +132,14 @@ function App() {
       </form>
       <div>
        <CheckBoxFilters filtersState={filtersState} setFilter={setFilter}></CheckBoxFilters>
-        
       </div>
       <div>
         {itemList && // Check is to show only completed tasks or active tasks, or both. Use the flip of the complete property to determine if task is active... As this does not modify the state IDs are still protected.
           itemList
             .filter(
               (obj) =>
-                (obj.completed && filtersState.complete == true) ||
-                (!obj.completed && filtersState.active == true)
+                (obj.completed && filtersState.complete === true) ||
+                (!obj.completed && filtersState.active === true)
             )
             .map((item) => (
               <div
@@ -223,7 +204,7 @@ function App() {
                           : (event) => editItem(item.id, event)
                       }
                     >
-                      Edit
+                      {item.editing ? "Done": "Edit"}
                     </button>
                   </div>
                 </form>

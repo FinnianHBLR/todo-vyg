@@ -8,13 +8,10 @@ export const CompleteTasksCheckBox = ({
   filtersState: Filters;
 }) => {
   return (
-    <div>
-      <label>Complete tasks</label>
       <input
         onChange={toggleCompeltedTasks}
         checked={filtersState.complete}
         type="checkbox"
       ></input>
-    </div>
   );
 };

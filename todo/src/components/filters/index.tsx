@@ -12,8 +12,6 @@ interface Props {
 }
 
 export const CheckBoxFilters = ({filtersState, setFilter}: Props) => {
-
-
   const toggleActiveTasks = () => {
     // Update state with old state + fippped actitve task state
     setFilter((currentFilter) => ({
@@ -32,7 +30,9 @@ export const CheckBoxFilters = ({filtersState, setFilter}: Props) => {
 
   return (
     <form className="grid gap-6 mb-6 md:grid-cols-2 pt-7 px-8 border py-2 border-gray-300">
+      <label>Active tasks</label>
       <ActiveTaskCheckBox toggleActiveTasks={toggleActiveTasks} filtersState={filtersState}></ActiveTaskCheckBox>
+      <label>Complete tasks</label>
       <CompleteTasksCheckBox toggleCompeltedTasks={toggleCompeltedTasks} filtersState={filtersState}></CompleteTasksCheckBox>
     </form>
   );
